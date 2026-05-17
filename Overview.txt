@@ -202,3 +202,71 @@ Vary: Accept
     "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc5MDAwMjAyLCJpYXQiOjE3Nzg5OTY2MDIsImp0aSI6ImUwMDk2YmM5MGJmODQyODY4YjUwOWYxOGM0MzBjMjI1IiwidXNlcl9pZCI6IjIifQ.SDLTfkapyIxx71Pa2erjVxlNcNfCrCaAM5-kRhIgM7g"
 }
 ------------------------------------
+
+Git Initialization ----->>
+
+inside backend run  
+cmd - git init 
+
+you should see below output 
+-------->>> Initialized empty Git repository
+
+git status -> You’ll see all project files in red/untracked.
+
+Do NOT initialize with:
+
+README
+.gitignore
+license
+
+Because project already exists locally. 
+Just click:
+
+Create Repository
+
+Run ->> git add . 
+to add all untracted files 
+
+then do first commit
+
+git commit -m "Initial backend setup with authentication"
+
+to connect repo ------>>>
+
+git remote add origin https://github.com/Uttara-24/enterprise-ticket-management-system
+
+push the code --------------------->> 
+git branch -M main 
+git push -u origin main
+
+------------------------- Authentication Completed --------------------------
+
+New → HTTP Request
+
+POST - http://127.0.0.1:8000/api/auth/login/
+Body → raw → JSON
+{
+    "username": "uttara",
+    "password": "test1234"
+}
+Send
+{
+    "refresh": "long_refresh_token",
+    "access": "jwt_access_token"
+}
+
+Take access token and generate Authentication 
+
+GET - http://127.0.0.1:8000/api/auth/protected/
+
+In Headers,
+
+Bearer eyJhbGciOi...
+
+{
+    "message": "Authenticated successfully"
+}
+
+
+
+
