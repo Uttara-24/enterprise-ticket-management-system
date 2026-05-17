@@ -1,0 +1,204 @@
+python -m venv menv -->>virtual environment created 
+
+menv\Scripts\activate -> to activate the environment
+
+pip install django djangorestframework psycopg2-binary 
+to install the django, djangorestframework & postgres library in env 
+
+CREATED DJANGO PROJECT WITH NAME backend
+
+CMD - django-admin startproject backend 
+
+CMD - cd backend 
+
+CREATED DJANGO APPS WITH NAME users
+
+CMD - python manage.py startapp users
+
+------------------------------------- Backend django setup completed ------------------------------
+
+Postgres Connection setup 
+
+1> Download postgres and pgadmin4 
+2> connect it 
+3> create a database name ticketflow_db 
+4> connect it with django 
+go to backend project folder >>> settings.py file
+
+replace DATABASE field with below code
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ticketflow_db',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+
+then to check the successfull connection we run the below command
+
+cmd- python manage.py migrate 
+
+If successful you’ll see:
+
+Applying contenttypes...
+Applying auth...
+Applying admin...
+
+This means Django is successfully connected to PostgreSQL.
+
+Verify Tables in PostgreSQL
+
+Open pgAdmin.
+
+Inside:
+
+ticketflow_db
+   → Schemas
+      → public
+         → Tables
+
+You should see tables like:
+
+auth_user
+django_admin_log
+django_migrations
+
+For PASSWORD Integration :
+
+cmd - pip install python-decouple
+
+Created .env file inside backend root
+
+In .env we kept,
+
+DB_NAME=ticketflow_db
+DB_USER=postgres
+DB_PASSWORD=admin
+DB_HOST=localhost
+DB_PORT=5432
+
+Updated settings.py, where we added another lib 
+
+-- from decouple import config
+
+Changed DATABASES Field again with below structure in settings.py
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+    }
+}
+
+Created .gitignore file inside which we kept below 
+
+menv/
+__pycache__/
+*.pyc
+.env
+
+--------------------- POSTGRES SQL CONNECTION COMPLETED --------------------------------------
+
+Custom User Model + Authentication System :
+
+Added app 'users' which we created in INSTALLED_APPS Field in settings.py
+
+INSTALLED_APPS = [
+    ...
+    'users',
+]
+
+-- Created a custom user model - models.py
+
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+
+class User(AbstractUser):
+
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('support', 'Support Engineer'),
+        ('customer', 'Customer'),
+    )
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='customer'
+    )
+
+    phone_number = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.username
+
+Why This Is Important
+
+Now your user table supports:
+
+roles
+extra fields
+future scalability
+
+This is real enterprise design.
+
+-- Tell Django to Use Custom User Model
+
+In Django:
+
+ALWAYS create custom user model BEFORE first migrate.
+
+Because once auth tables are created, changing user model becomes difficult.
+
+This is actually an important real-world Django concept.
+
+--------------------------------------------------------------------------------------------------
+
+Login API --------------------------------->
+
+pip install djangorestframework
+pip install djangorestframework-simplejwt
+
+#Configure REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+#Configure JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
+
+
+
+-------------------------------------
+JWT Token ---
+HTTP 200 OK
+Allow: POST, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3OTA4MzAwMiwiaWF0IjoxNzc4OTk2NjAyLCJqdGkiOiI2ZWUzMzNhYjBmOTc0ZGRmYjdjMjRiMTFlZGUyNmU0NiIsInVzZXJfaWQiOiIyIn0.cJYKixkidrdPTW0OYQZHaKaqbkRWLh3cuIGdaZayvxI",
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc5MDAwMjAyLCJpYXQiOjE3Nzg5OTY2MDIsImp0aSI6ImUwMDk2YmM5MGJmODQyODY4YjUwOWYxOGM0MzBjMjI1IiwidXNlcl9pZCI6IjIifQ.SDLTfkapyIxx71Pa2erjVxlNcNfCrCaAM5-kRhIgM7g"
+}
+------------------------------------
