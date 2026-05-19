@@ -267,6 +267,1161 @@ Bearer eyJhbGciOi...
     "message": "Authenticated successfully"
 }
 
+Now, we will create Login Page FE through React.
+
+For that, we need to install nodejs using following commands.
+
+https://nodejs.org/?utm_source=chatgpt.com ---> Link to download nodejs
+
+Windows Installer (.msi) will start downloading.
+
+IMPORTANT.
+
+Close and reopen:
+
+VS Code
+terminal
+
+So PATH variables refresh properly.
+
+cmd - node -v (Check nodejs version)
+cmd - npm -v (Check node package manager version)
+
+Create frontend folder using below cmd
+
+npm create vite@latest frontend
+
+You will get below options to select framework you need to select ---> React
+
+Use:
+Arrow keys ↑ ↓
+Press Enter
+
+Then next screen will ask:
+
+Select a variant
+Choose:
+JavaScript
+
+NOT:
+TypeScript
+SWC variants for now
+
+After that run:
+cd frontend
+
+Then:
+cmd - npm install
+
+After installation completes:
+cmd - npm run dev
+
+You’ll get something like:
+
+http://localhost:5173/
+
+Open that URL in browser.
+That means your React frontend is running successfully.
+
+Inside frontend terminal run:
+cmd - npm install axios react-router-dom
+cmd - npm install -D tailwindcss @tailwindcss/vite (Install Tailwind CSS)
+
+Open:
+
+frontend/vite.config.js
+
+Replace with:
+
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+})
+STEP 4 — Configure Tailwind
+
+Open:
+
+src/index.css
+
+Delete everything and add:
+
+@import "tailwindcss";
+
+STEP 5 — Create Folder Structure
+
+Inside src/
+
+Create folders:
+
+pages
+components
+services
+routes
+context
+
+STEP 6 — Create Login Page
+Create file:
+src/pages/Login.jsx
+
+Code:
+import { useState } from "react";
+import axios from "axios";
+
+function Login() {
+
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/auth/login/",
+        formData
+      );
+
+      console.log(response.data);
+
+      localStorage.setItem(
+        "access_token",
+        response.data.access
+      );
+
+      localStorage.setItem(
+        "refresh_token",
+        response.data.refresh
+      );
+
+      alert("Login Successful");
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Invalid Credentials");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-lg w-96"
+      >
+
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          TicketFlow Login
+        </h2>
+
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={formData.username}
+          onChange={handleChange}
+          className="w-full mb-4 p-3 border rounded"
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full mb-4 p-3 border rounded"
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
+        >
+          Login
+        </button>
+
+      </form>
+
+    </div>
+  );
+}
+
+export default Login;
+
+STEP 7 — Update App.jsx
+Open:
+src/App.jsx
+
+Replace everything with:
+
+Code :
+import Login from "./pages/Login";
+
+function App() {
+  return <Login />;
+}
+
+export default App;
+
+STEP 8 — Enable CORS in Django
+Without this frontend cannot talk to backend.
+
+Install CORS Package
+Inside backend terminal:
+cmd - pip install django-cors-headers
+
+STEP 9 — Update settings.py
+Add in INSTALLED_APPS
+'corsheaders',
+
+STEP 10 — Add Middleware
+In MIDDLEWARE
+Add at TOP:
+'corsheaders.middleware.CorsMiddleware',
+
+STEP 11 — Allow React Frontend
+At bottom of settings.py
+Add:
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
+That means your custom User model is not registered in Django admin yet.
+
+Completely normal.
+
+We need to register it manually.
+
+STEP 1 — Open
+users/admin.py
+STEP 2 — Replace Everything With
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
+from .models import User
 
 
+admin.site.register(User, UserAdmin)
+What This Does
 
+This tells Django:
+
+Show custom User model in admin panel
+
+using Django’s built-in admin features.
+
+STEP 3 — Save File
+
+Then restart server:
+
+python manage.py runserver
+STEP 4 — Open Admin Panel Again
+
+Go to:
+
+http://127.0.0.1:8000/admin/
+
+Now you should see:
+
+Users
+
+section.
+
+STEP 5 — Verify User Exists
+
+Open:
+
+Users
+
+Check:
+
+your username exists
+is_active is checked
+
+Now we should build:
+
+Protected Dashboard + Routing System
+
+Because currently:
+
+anyone can access pages
+no navigation exists
+no dashboard after login
+
+We’ll now make the frontend behave like a real application.
+
+What We’ll Build Next
+Features
+Feature	Purpose
+React Router	Multiple pages
+Dashboard Page	Landing page after login
+Protected Routes	Block unauthenticated users
+Navbar	Navigation
+Logout	Clear token
+Auto Redirect	Login → Dashboard
+
+This is a MAJOR frontend milestone.
+
+PROJECT FLOW AFTER THIS
+Login
+   ↓
+Dashboard
+   ↓
+Tickets Page
+   ↓
+Create Ticket
+   ↓
+Assign / Update Tickets
+STEP 1 — Create Pages
+
+Inside:
+
+src/pages/
+
+Create:
+
+Dashboard.jsx
+Tickets.jsx
+Dashboard.jsx
+function Dashboard() {
+  return (
+    <div className="p-10">
+      <h1 className="text-3xl font-bold">
+        Dashboard
+      </h1>
+
+      <p className="mt-4">
+        Welcome to TicketFlow
+      </p>
+    </div>
+  );
+}
+
+export default Dashboard;
+Tickets.jsx
+function Tickets() {
+  return (
+    <div className="p-10">
+      <h1 className="text-3xl font-bold">
+        Tickets Page
+      </h1>
+    </div>
+  );
+}
+
+export default Tickets;
+STEP 2 — Create Navbar Component
+
+Create:
+
+src/components/Navbar.jsx
+
+Add:
+
+import { Link, useNavigate } from "react-router-dom";
+
+function Navbar() {
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+
+    navigate("/");
+  };
+
+  return (
+    <nav className="bg-gray-800 text-white p-4 flex justify-between">
+
+      <div className="flex gap-4">
+
+        <Link to="/dashboard">
+          Dashboard
+        </Link>
+
+        <Link to="/tickets">
+          Tickets
+        </Link>
+
+      </div>
+
+      <button
+        onClick={handleLogout}
+        className="bg-red-500 px-4 py-1 rounded"
+      >
+        Logout
+      </button>
+
+    </nav>
+  );
+}
+
+export default Navbar;
+STEP 3 — Create Protected Route
+
+Create:
+
+src/routes/ProtectedRoute.jsx
+
+Add:
+
+import { Navigate } from "react-router-dom";
+
+function ProtectedRoute({ children }) {
+
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+}
+
+export default ProtectedRoute;
+What This Does
+
+If token missing:
+
+user redirected to login
+
+If token exists:
+
+allow access
+
+This is real authentication flow.
+
+STEP 4 — Update Login Page
+
+Open:
+
+src/pages/Login.jsx
+
+Add import:
+
+import { useNavigate } from "react-router-dom";
+
+Inside component:
+
+const navigate = useNavigate();
+
+After successful login add:
+
+navigate("/dashboard");
+
+So successful login becomes:
+
+alert("Login Successful");
+
+navigate("/dashboard");
+STEP 5 — Update App.jsx
+
+Replace entire file:
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Tickets from "./pages/Tickets";
+
+import Navbar from "./components/Navbar";
+
+import ProtectedRoute from "./routes/ProtectedRoute";
+
+function App() {
+
+  return (
+    <BrowserRouter>
+
+      <Routes>
+
+        <Route
+          path="/"
+          element={<Login />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <>
+                <Navbar />
+                <Dashboard />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/tickets"
+          element={
+            <ProtectedRoute>
+              <>
+                <Navbar />
+                <Tickets />
+              </>
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
+
+    </BrowserRouter>
+  );
+}
+
+export default App;
+STEP 6 — Run Frontend
+npm run dev
+TEST FLOW
+Try This
+Without Login
+
+Open:
+
+http://localhost:5173/dashboard
+
+Expected:
+
+redirected to login
+After Login
+
+Expected:
+
+redirected to dashboard
+Click Tickets
+
+Expected:
+
+tickets page opens
+Logout
+
+Expected:
+
+token removed
+redirected to login
+What You Just Built
+
+You now have:
+
+frontend routing
+protected pages
+authentication flow
+navigation
+logout system
+
+This is now behaving like a real SaaS application.
+
+We will now build:
+
+Ticket Listing UI + Create Ticket Form
+
+This will:
+
+fetch tickets from Django backend
+display them in React
+create new tickets
+use JWT authentication
+make your app interactive
+
+This is a major portfolio milestone.
+
+What We’ll Build
+Features
+Feature	Purpose
+Fetch tickets	GET API
+Show ticket cards	UI rendering
+Create ticket form	POST API
+Auto refresh tickets	Real-time UI update
+Token authentication	Secure APIs
+STEP 1 — Create API Service
+
+Create file:
+
+src/services/api.js
+
+Add:
+
+import axios from "axios";
+
+const API = axios.create({
+  baseURL: "http://127.0.0.1:8000/api",
+});
+
+API.interceptors.request.use((config) => {
+
+  const token = localStorage.getItem("access_token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+export default API;
+Why This Is Important
+
+Now every request automatically sends:
+
+Authorization: Bearer token
+
+Professional frontend architecture.
+
+STEP 2 — Update Tickets.jsx
+
+Open:
+
+src/pages/Tickets.jsx
+
+Replace everything with:
+
+import { useEffect, useState } from "react";
+import API from "../services/api";
+
+function Tickets() {
+
+  const [tickets, setTickets] = useState([]);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    priority: "medium",
+    category: "other",
+  });
+
+  const fetchTickets = async () => {
+
+    try {
+
+      const response = await API.get("/tickets/");
+
+      setTickets(response.data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const handleChange = (e) => {
+
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+
+    e.preventDefault();
+
+    try {
+
+      await API.post(
+        "/tickets/",
+        formData
+      );
+
+      alert("Ticket Created");
+
+      setFormData({
+        title: "",
+        description: "",
+        priority: "medium",
+        category: "other",
+      });
+
+      fetchTickets();
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Failed to create ticket");
+    }
+  };
+
+  return (
+    <div className="p-10">
+
+      <h1 className="text-3xl font-bold mb-6">
+        Tickets
+      </h1>
+
+      {/* CREATE TICKET FORM */}
+
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-lg rounded-lg p-6 mb-10"
+      >
+
+        <h2 className="text-xl font-bold mb-4">
+          Create Ticket
+        </h2>
+
+        <input
+          type="text"
+          name="title"
+          placeholder="Ticket Title"
+          value={formData.title}
+          onChange={handleChange}
+          className="w-full border p-3 rounded mb-4"
+          required
+        />
+
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={formData.description}
+          onChange={handleChange}
+          className="w-full border p-3 rounded mb-4"
+          rows="4"
+          required
+        />
+
+        <select
+          name="priority"
+          value={formData.priority}
+          onChange={handleChange}
+          className="w-full border p-3 rounded mb-4"
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+
+        <select
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          className="w-full border p-3 rounded mb-4"
+        >
+          <option value="other">Other</option>
+          <option value="login">Login</option>
+          <option value="network">Network</option>
+          <option value="database">Database</option>
+          <option value="payment">Payment</option>
+        </select>
+
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+        >
+          Create Ticket
+        </button>
+
+      </form>
+
+      {/* TICKET LIST */}
+
+      <div className="grid gap-6">
+
+        {tickets.map((ticket) => (
+
+          <div
+            key={ticket.id}
+            className="bg-white shadow-lg rounded-lg p-6"
+          >
+
+            <h2 className="text-xl font-bold">
+              {ticket.title}
+            </h2>
+
+            <p className="mt-2 text-gray-700">
+              {ticket.description}
+            </p>
+
+            <div className="mt-4 flex gap-4">
+
+              <span className="bg-yellow-200 px-3 py-1 rounded">
+                {ticket.priority}
+              </span>
+
+              <span className="bg-green-200 px-3 py-1 rounded">
+                {ticket.status}
+              </span>
+
+              <span className="bg-blue-200 px-3 py-1 rounded">
+                {ticket.category}
+              </span>
+
+            </div>
+
+          </div>
+        ))}
+
+      </div>
+
+    </div>
+  );
+}
+
+export default Tickets;
+STEP 3 — Verify Backend URL Exists
+
+Your backend should already have:
+
+/api/tickets/
+
+configured.
+
+STEP 4 — Start Both Servers
+Backend
+python manage.py runserver
+Frontend
+npm run dev
+STEP 5 — Open Tickets Page
+
+Go to:
+
+http://localhost:5173/tickets
+TEST FLOW
+Create Ticket
+
+Fill:
+
+title
+description
+priority
+category
+
+Click:
+
+Create Ticket
+
+Expected:
+
+ticket stored in PostgreSQL
+appears immediately in UI
+What You Just Built
+
+You now have:
+
+Feature	Status
+React forms	✅
+API integration	✅
+Axios service layer	✅
+Ticket creation	✅
+Ticket listing	✅
+JWT protected requests	✅
+Dynamic rendering	✅
+
+This is real full-stack engineering.
+
+Your Project Is Now Becoming Portfolio-Level
+
+Because you already demonstrate:
+
+frontend
+backend
+database
+authentication
+API integration
+CRUD operations
+
+These are actual development-role skills.
+
+NEXT STEP
+
+Next we should build:
+
+Advanced Ticket Features
+
+Including:
+
+update ticket status
+assign engineer
+delete ticket
+filters/search
+pagination
+comments system
+dashboard analytics
+
+This is where it becomes enterprise-grade.
+
+So now we need to properly create the backend Ticket module.
+
+STEP 1 — Go to Backend Folder
+
+Open terminal inside:
+
+backend/
+STEP 2 — Create Tickets App
+
+Run:
+
+python manage.py startapp tickets
+
+This creates:
+
+tickets/
+
+folder automatically.
+
+After Creation Your Structure Will Look Like
+backend/
+ ├── tickets/
+ │     ├── migrations/
+ │     ├── admin.py
+ │     ├── apps.py
+ │     ├── models.py
+ │     ├── views.py
+STEP 3 — Add tickets App to settings.py
+
+Open:
+
+backend/settings.py
+
+Inside:
+
+INSTALLED_APPS
+
+add:
+
+'tickets',
+
+Example:
+
+INSTALLED_APPS = [
+
+    'django.contrib.admin',
+    'django.contrib.auth',
+    ...
+
+    'rest_framework',
+    'users',
+    'tickets',
+]
+STEP 4 — Create tickets/urls.py
+
+NOW create file:
+
+tickets/urls.py
+
+Add:
+
+from django.urls import path
+
+from .views import (
+    TicketListCreateView,
+    TicketDetailView,
+)
+
+urlpatterns = [
+
+    path(
+        '',
+        TicketListCreateView.as_view(),
+        name='ticket-list-create',
+    ),
+
+    path(
+        '<int:pk>/',
+        TicketDetailView.as_view(),
+        name='ticket-detail',
+    ),
+]
+STEP 5 — Add Ticket Model
+
+Open:
+
+tickets/models.py
+
+Replace everything with:
+
+from django.db import models
+from django.conf import settings
+
+
+class Ticket(models.Model):
+
+    STATUS_CHOICES = (
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed'),
+    )
+
+    PRIORITY_CHOICES = (
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    )
+
+    CATEGORY_CHOICES = (
+        ('login', 'Login'),
+        ('network', 'Network'),
+        ('database', 'Database'),
+        ('payment', 'Payment'),
+        ('other', 'Other'),
+    )
+
+    title = models.CharField(max_length=255)
+
+    description = models.TextField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='open'
+    )
+
+    priority = models.CharField(
+        max_length=20,
+        choices=PRIORITY_CHOICES,
+        default='medium'
+    )
+
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default='other'
+    )
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='created_tickets'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+STEP 6 — Create Serializer
+
+Create:
+
+tickets/serializers.py
+
+Add:
+
+from rest_framework import serializers
+from .models import Ticket
+
+
+class TicketSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ticket
+        fields = '__all__'
+        read_only_fields = ['created_by']
+STEP 7 — Add Views
+
+Open:
+
+tickets/views.py
+
+Replace everything with:
+
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+
+from .models import Ticket
+from .serializers import TicketSerializer
+
+
+class TicketListCreateView(generics.ListCreateAPIView):
+
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated]
+STEP 8 — Connect Main URLs
+
+Open:
+
+backend/urls.py
+
+Add:
+
+path('api/tickets/', include('tickets.urls')),
+
+Final file:
+
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+
+    path('admin/', admin.site.urls),
+
+    path('api/auth/', include('users.urls')),
+
+    path('api/tickets/', include('tickets.urls')),
+]
+STEP 9 — Create Database Tables
+
+Run:
+
+python manage.py makemigrations
+
+Then:
+
+python manage.py migrate
+STEP 10 — Restart Django Server
+python manage.py runserver
+STEP 11 — TEST
+
+Open browser:
+
+http://127.0.0.1:8000/api/tickets/
+
+Expected:
+
+Authentication credentials were not provided.
+
+That means backend ticket API is working correctly.
+
+STEP 12 — Retry Frontend
+
+Now go to:
+
+http://localhost:5173/tickets
+
+Create ticket again.
+
+Now it should:
+
+save in PostgreSQL
+instantly appear in UI
+
+Successfully.
